@@ -1,0 +1,25 @@
+name: Setup Emela
+description: Install the Emela compiler and add it to PATH.
+author: emela-lang
+branding:
+  icon: package
+  color: purple
+
+inputs:
+  version:
+    description: The version to install, like `0.22.0`, or `latest` for the latest stable release.
+    default: latest
+
+outputs:
+  version:
+    description: The installed version, like `0.22.0`.
+    value: ${{ steps.install.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - id: install
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+      run: '"$GITHUB_ACTION_PATH/install.sh"'

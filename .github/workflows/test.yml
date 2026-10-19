@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        version: [latest, 0.22.0, v0.21.0]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: emela
+        uses: ./
+        with:
+          version: ${{ matrix.version }}
+      - name: Run the installed emela
+        run: |
+          emela --version
+          test "$(emela --version)" = "emela ${{ steps.emela.outputs.version }}"
+      - name: Check a pinned version
+        if: matrix.version != 'latest'
+        run: |
+          version='${{ matrix.version }}'
+          test "${{ steps.emela.outputs.version }}" = "${version#v}"
+
+  unknown-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: emela
+        uses: ./
+        continue-on-error: true
+        with:
+          version: 0.0.0
+      - name: Expect the install to fail
+        run: test "${{ steps.emela.outcome }}" = failure
