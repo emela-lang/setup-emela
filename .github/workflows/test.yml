@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        version: [latest, 0.22.0, v0.21.0]
+        version: [latest, 0.24.0, v0.23.0]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

@@ -7,7 +7,7 @@ steps:
   - uses: actions/checkout@v4
   - uses: emela-lang/setup-emela@v1
     with:
-      version: 0.22.0
+      version: 0.24.0
   - run: emela pome install
   - run: emela test
 ```
@@ -16,13 +16,13 @@ steps:
 
 | 名前 | 既定 | 内容 |
 |---|---|---|
-| `version` | `latest` | 入れる版．`0.22.0` と `v0.22.0` のどちらでもよい．`latest` は最新の安定版 |
+| `version` | `latest` | 入れる版．`0.24.0` と `v0.24.0` のどちらでもよい．`latest` は最新の安定版 |
 
 ## 出力
 
 | 名前 | 内容 |
 |---|---|
-| `version` | 入れた版（`0.22.0` の形） |
+| `version` | 入れた版（`0.24.0` の形） |
 
 ## 対応する runner
 
