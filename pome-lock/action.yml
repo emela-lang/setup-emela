@@ -42,11 +42,9 @@ runs:
           echo "::error::check out the branch of the pull request (actions/checkout with ref: \${{ github.head_ref }})"
           exit 1
         fi
-    - name: Install emela
-      shell: bash
-      env:
-        INPUT_VERSION: ${{ inputs.version }}
-      run: '"$GITHUB_ACTION_PATH/../install.sh"'
+    - uses: emela-lang/setup-emela@v1
+      with:
+        version: ${{ inputs.version }}
     - name: Update the locks
       id: update
       shell: bash
