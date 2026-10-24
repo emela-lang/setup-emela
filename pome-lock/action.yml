@@ -1,0 +1,71 @@
+name: Update Pome.lock
+description: Run `emela pome install` for every Pome.lock and push the changes to the branch of the pull request.
+author: emela-lang
+branding:
+  icon: lock
+  color: purple
+
+inputs:
+  token:
+    description: A token that can push to the branch. A push with GITHUB_TOKEN starts no other workflow, so CI runs again only with a GitHub App token or a personal access token.
+    required: true
+  version:
+    description: The version of emela to run, like `0.24.0`, or `latest` for the latest stable release.
+    default: latest
+  author-name:
+    description: The author of the commit.
+    default: github-actions[bot]
+  author-email:
+    description: The email of the author of the commit.
+    default: 41898282+github-actions[bot]@users.noreply.github.com
+
+outputs:
+  changed:
+    description: '`true` when a Pome.lock changed and was pushed.'
+    value: ${{ steps.update.outputs.changed }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check the checkout
+      shell: bash
+      env:
+        EVENT: ${{ github.event_name }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      run: |
+        if [ "$EVENT" != pull_request ] && [ "$EVENT" != pull_request_target ]; then
+          echo "::error::pome-lock runs on pull_request, not on $EVENT"
+          exit 1
+        fi
+        # The default checkout of a pull request is a merge commit, which must not be pushed.
+        if [ "$(git rev-parse HEAD)" != "$HEAD_SHA" ]; then
+          echo "::error::check out the branch of the pull request (actions/checkout with ref: \${{ github.head_ref }})"
+          exit 1
+        fi
+    - uses: emela-lang/setup-emela@v1
+      with:
+        version: ${{ inputs.version }}
+    - name: Update the locks
+      id: update
+      shell: bash
+      run: |
+        git ls-files '*Pome.lock' | while read -r lock; do
+          (cd "$(dirname "$lock")" && emela pome install)
+        done
+        if git diff --quiet; then
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Push the locks
+      if: steps.update.outputs.changed == 'true'
+      shell: bash
+      env:
+        TOKEN: ${{ inputs.token }}
+        BRANCH: ${{ github.head_ref }}
+        AUTHOR_NAME: ${{ inputs.author-name }}
+        AUTHOR_EMAIL: ${{ inputs.author-email }}
+      run: |
+        git -c user.name="$AUTHOR_NAME" -c user.email="$AUTHOR_EMAIL" \
+          commit -am 'chore(deps): update Pome.lock'
+        git push "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${BRANCH}"
