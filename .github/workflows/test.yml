@@ -41,3 +41,18 @@ jobs:
           version: 0.0.0
       - name: Expect the install to fail
         run: test "${{ steps.emela.outcome }}" = failure
+
+  # Releases before emela-lang/emela#615 have no playground compiler. Add a job that fetches one
+  # from `latest` once a release has it.
+  no-playground:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: emela
+        uses: ./
+        continue-on-error: true
+        with:
+          version: 0.27.1
+          playground: true
+      - name: Expect the playground fetch to fail
+        run: test "${{ steps.emela.outcome }}" = failure
