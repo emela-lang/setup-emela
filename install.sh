@@ -43,9 +43,10 @@ if [ ! -x "$dir/emela" ]; then
   chmod +x "$dir/emela"
 fi
 
+# A release may add `+<commit>` after the version.
 reported="$("$dir/emela" --version)"
-if [ "$reported" != "emela $version" ]; then
-  echo "::error::emela --version printed '$reported', expected 'emela $version'"
+if [ "${reported%%+*}" != "emela $version" ]; then
+  echo "::error::emela --version printed '$reported', expected 'emela $version' (with an optional +<commit>)"
   exit 1
 fi
 

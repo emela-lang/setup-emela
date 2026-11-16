@@ -22,7 +22,8 @@ jobs:
       - name: Run the installed emela
         run: |
           emela --version
-          test "$(emela --version)" = "emela ${{ steps.emela.outputs.version }}"
+          reported="$(emela --version)"
+          test "${reported%%+*}" = "emela ${{ steps.emela.outputs.version }}"
       - name: Check a pinned version
         if: matrix.version != 'latest'
         run: |
