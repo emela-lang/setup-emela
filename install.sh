@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Installs the emela binary of a GitHub release into the runner's tool cache and adds it to PATH.
+# With INPUT_PLAYGROUND=true, also puts the compiler for the browser of the same release
+# (emela_playground.js and emela_playground_bg.wasm) into the tool cache.
 set -euo pipefail
 
 repo="emela-lang/emela"
@@ -43,12 +45,32 @@ if [ ! -x "$dir/emela" ]; then
   chmod +x "$dir/emela"
 fi
 
+# A release may add `+<commit>` after the version.
 reported="$("$dir/emela" --version)"
-if [ "$reported" != "emela $version" ]; then
-  echo "::error::emela --version printed '$reported', expected 'emela $version'"
+if [ "${reported%%+*}" != "emela $version" ]; then
+  echo "::error::emela --version printed '$reported', expected 'emela $version' (with an optional +<commit>)"
   exit 1
 fi
 
 echo "$dir" >> "$GITHUB_PATH"
 echo "version=$version" >> "$GITHUB_OUTPUT"
 echo "installed $reported"
+
+if [ "${INPUT_PLAYGROUND:-false}" = true ]; then
+  # The same files on every runner, so they are cached by version only.
+  playground="$RUNNER_TOOL_CACHE/emela/$version/playground"
+  if [ ! -f "$playground/emela_playground_bg.wasm" ]; then
+    ptmp="$(mktemp -d)"
+    trap 'rm -rf "${tmp:-}" "$ptmp"' EXIT
+    url="https://github.com/$repo/releases/download/$tag/emela-playground-$tag.tar.gz"
+    if ! curl -fsSL "$url" -o "$ptmp/playground.tar.gz"; then
+      echo "::error::cannot download $url (releases before 0.28.0 have no playground compiler)"
+      exit 1
+    fi
+    tar -xzf "$ptmp/playground.tar.gz" -C "$ptmp"
+    mkdir -p "$playground"
+    cp "$ptmp/emela_playground.js" "$ptmp/emela_playground_bg.wasm" "$playground/"
+  fi
+  echo "playground=$playground" >> "$GITHUB_OUTPUT"
+  echo "installed the playground compiler in $playground"
+fi

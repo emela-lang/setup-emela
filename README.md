@@ -17,12 +17,31 @@ steps:
 | 名前 | 既定 | 内容 |
 |---|---|---|
 | `version` | `latest` | 入れる版．`0.24.0` と `v0.24.0` のどちらでもよい．`latest` は最新の安定版 |
+| `playground` | `false` | `true` なら，同じリリースのブラウザ用コンパイラ（Playground の wasm）も取ってくる．0.28.0 以降 |
 
 ## 出力
 
 | 名前 | 内容 |
 |---|---|
 | `version` | 入れた版（`0.24.0` の形） |
+| `playground` | `playground: true` のとき，`emela_playground.js` と `emela_playground_bg.wasm` を置いたディレクトリ |
+
+## ブラウザ用コンパイラ（playground）
+
+`playground: true` で，リリースの `emela-playground-<tag>.tar.gz` を取ってくる．中身は wasm-bindgen（`--target web`）の出力で，`check`，`format`，`compile` を公開している．ブラウザで Emela を検査，整形，実行するサイト（docs.emela.dev の Playground など）のビルドで使う．
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+  - id: emela
+    uses: emela-lang/setup-emela@v1
+    with:
+      version: 0.28.0
+      playground: true
+  - run: cp ${{ steps.emela.outputs.playground }}/* public/wasm/emela/
+```
+
+ブラウザ用コンパイラが入っているのは emela-lang/emela#615 より後のリリースだけ．それより前の版を指定すると失敗する．runner の OS には依らない．
 
 ## 対応する runner
 

@@ -9,11 +9,17 @@ inputs:
   version:
     description: The version to install, like `0.24.0`, or `latest` for the latest stable release.
     default: latest
+  playground:
+    description: Also fetch the compiler for the browser of the same release (`true` or `false`).
+    default: "false"
 
 outputs:
   version:
     description: The installed version, like `0.24.0`.
     value: ${{ steps.install.outputs.version }}
+  playground:
+    description: The directory with `emela_playground.js` and `emela_playground_bg.wasm`, when `playground` is `true`.
+    value: ${{ steps.install.outputs.playground }}
 
 runs:
   using: composite
@@ -22,4 +28,5 @@ runs:
       shell: bash
       env:
         INPUT_VERSION: ${{ inputs.version }}
+        INPUT_PLAYGROUND: ${{ inputs.playground }}
       run: '"$GITHUB_ACTION_PATH/install.sh"'
