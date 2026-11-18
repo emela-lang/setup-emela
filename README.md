@@ -17,7 +17,7 @@ steps:
 | 名前 | 既定 | 内容 |
 |---|---|---|
 | `version` | `latest` | 入れる版．`0.24.0` と `v0.24.0` のどちらでもよい．`latest` は最新の安定版 |
-| `playground` | `false` | `true` なら，同じリリースのブラウザ用コンパイラ（Playground の wasm）も取ってくる |
+| `playground` | `false` | `true` なら，同じリリースのブラウザ用コンパイラ（Playground の wasm）も取ってくる．0.28.0 以降 |
 
 ## 出力
 

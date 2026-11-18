@@ -64,7 +64,7 @@ if [ "${INPUT_PLAYGROUND:-false}" = true ]; then
     trap 'rm -rf "${tmp:-}" "$ptmp"' EXIT
     url="https://github.com/$repo/releases/download/$tag/emela-playground-$tag.tar.gz"
     if ! curl -fsSL "$url" -o "$ptmp/playground.tar.gz"; then
-      echo "::error::cannot download $url (releases before the playground compiler was added have none)"
+      echo "::error::cannot download $url (releases before 0.28.0 have no playground compiler)"
       exit 1
     fi
     tar -xzf "$ptmp/playground.tar.gz" -C "$ptmp"
