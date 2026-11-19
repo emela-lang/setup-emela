@@ -30,6 +30,44 @@ jobs:
           version='${{ matrix.version }}'
           test "${{ steps.emela.outputs.version }}" = "${version#v}"
 
+  # Windows builds are released from 0.28.0 on.
+  windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [latest, 0.28.0]
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - id: emela
+        uses: ./
+        with:
+          version: ${{ matrix.version }}
+      - name: Run the installed emela
+        run: |
+          emela --version
+          reported="$(emela --version | tr -d '\r')"
+          test "${reported%%+*}" = "emela ${{ steps.emela.outputs.version }}"
+      - name: Find emela from cmd
+        shell: cmd
+        run: emela --version
+
+  windows-before-0-28:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: emela
+        uses: ./
+        continue-on-error: true
+        with:
+          version: 0.27.1
+      - name: Expect the install to fail
+        shell: bash
+        run: test "${{ steps.emela.outcome }}" = failure
+
   unknown-version:
     runs-on: ubuntu-latest
     steps:

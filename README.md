@@ -47,10 +47,19 @@ steps:
 
 - Linux の x64（`ubuntu-latest` など）
 - macOS の ARM64（`macos-latest` など）
+- Windows の x64（`windows-latest` など）．Windows のリリース物があるのは 0.28.0 以降
 
-コンパイラの [リリース](https://github.com/emela-lang/emela/releases) の tarball をそのまま使う．ほかの runner の版はリリースにないので，入れられない．
+コンパイラの [リリース](https://github.com/emela-lang/emela/releases) のアーカイブ（Windows は zip，ほかは tarball）をそのまま使う．ほかの runner の版はリリースにないので，入れられない．
 
-`emela run` と `emela test` の JS ターゲットは node を，C ターゲットは C コンパイラを使う．node は `actions/setup-node` で入れる．
+`emela run` と `emela test` は，ターゲットごとに次のものを使う．Action はどれも入れない．
+
+| ターゲット | 使うもの |
+|---|---|
+| `js` | node（`actions/setup-node` で入れる） |
+| `native` | C11 と POSIX.1-2008 のヘッダを持つ C コンパイラ（`cc`，または環境変数 `EMELA_CC`） |
+| `wasm` | wasmtime 49 以降（または環境変数 `EMELA_WASMTIME`） |
+
+ターゲット `c` は `native` の古い名前で，0.29 で無くなる．
 
 ## Pome.lock の更新（pome-lock）
 
